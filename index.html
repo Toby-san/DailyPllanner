@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OUR DAILY PLANNER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-gradient: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --glass-blur: 12px;
+        }
+
+        .dark-mode {
+            --bg-gradient: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+            --card-bg: rgba(31, 41, 55, 0.7);
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- Profile Selection Page --- */
+        #profile-selection {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .selection-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 50px;
+            color: var(--primary);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .profile-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .profile-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 40px;
+            width: 280px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .profile-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            background: var(--primary);
+        }
+
+        .profile-card:hover * {
+            color: white !important;
+        }
+
+        .profile-emoji {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* --- Dashboard Page --- */
+        #dashboard {
+            display: none;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .btn-icon {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 2px;
+        }
+
+        #live-clock {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+            background: linear-gradient(to bottom, var(--primary), #818cf8);
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .countdown-banner {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 12px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: 1px dashed var(--primary);
+        }
+
+        /* --- Timeline --- */
+        .day-scroller {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0 20px;
+            margin-bottom: 10px;
+            scrollbar-width: none;
+        }
+        .day-scroller::-webkit-scrollbar { display: none; }
+
+        .day-tab {
+            padding: 10px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow);
+        }
+
+        .day-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 100px 1fr 40px;
+            align-items: center;
+            gap: 15px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card.active {
+            border-left: 6px solid var(--primary);
+            background: #fff;
+        }
+        .dark-mode .task-card.active {
+            background: #2d3748;
+        }
+
+        .task-time {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+
+        .task-name {
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            width: 100%;
+            outline: none;
+        }
+
+        .task-name.completed {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .task-check {
+            width: 24px;
+            height: 24px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: 0.2s;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+
+        .task-card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .add-task-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px dashed var(--primary);
+            background: transparent;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-task-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .task-card {
+                grid-template-columns: 80px 1fr;
+            }
+            #live-clock {
+                font-size: 2.5rem;
+            }
+            .selection-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Profile Selection Screen -->
+    <section id="profile-selection">
+        <h1 class="selection-title">OUR DAILY PLANNER</h1>
+        <div class="profile-container">
+            <div class="profile-card" onclick="selectProfile('htoo_aung')">
+                <span class="profile-emoji">👨‍💻</span>
+                <h2 class="profile-name">HTOO AUNG</h2>
+            </div>
+            <div class="profile-card" onclick="selectProfile('norma')">
+                <span class="profile-emoji">👩‍🎨</span>
+                <h2 class="profile-name">NORMA</h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard -->
+    <section id="dashboard">
+        <header>
+            <div class="header-top">
+                <button class="btn-icon" onclick="backToProfiles()" title="Switch Profile">👥</button>
+                <div class="header-title">OUR DAILY PLANNER</div>
+                <button class="btn-icon" onclick="toggleDarkMode()" id="dark-mode-toggle">🌙</button>
+            </div>
+            <div id="live-clock">00:00:00</div>
+            <div class="countdown-banner" id="countdown-display">
+                Welcome back! Select a task to start.
+            </div>
+        </header>
+
+        <div class="day-scroller" id="day-scroller">
+            <!-- Days injected by JS -->
+        </div>
+
+        <div class="timeline" id="timeline">
+            <!-- Tasks injected by JS -->
+        </div>
+
+        <button class="add-task-btn" onclick="addNewTask()">+ Add New Task</button>
+    </section>
+
+    <script>
+        // --- Data ---
+        const htooAungDefault = {
+            "Monday": [
+                { time: "12:00-12:30", start: "12:00", end: "12:30", task: "Wake up + breakfast", done: false },
+                { time: "12:30-14:30", start: "12:30", end: "14:30", task: "💻 Web Development (HTML/CSS)", done: false },
+                { time: "14:30-15:00", start: "14:30", end: "15:00", task: "Break", done: false },
+                { time: "15:00-16:30", start: "15:00", end: "16:30", task: "🧠 JavaScript", done: false },
+                { time: "16:30-17:00", start: "16:30", end: "17:00", task: "Break", done: false },
+                { time: "17:00-18:00", start: "17:00", end: "18:00", task: "🗣 English + Thai speaking", done: false },
+                { time: "18:00-18:40", start: "18:00", end: "18:40", task: "📡 IoT learning", done: false },
+                { time: "19:30-21:00", start: "19:30", end: "21:00", task: "💪 Gym (Chest + Triceps)", done: false },
+                { time: "21:30-23:30", start: "21:30", end: "23:30", task: "💻 Build Web Project", done: false },
+                { time: "23:30-00:00", start: "23:30", end: "23:59", task: "Review / Plan tomorrow", done: false }
+            ],
+            "Tuesday": [
+                { time: "12:30-14:30", start: "12:30", end: "14:30", task: "💻 Web Development", done: false },
+                { time: "15:00-16:30", start: "15:00", end: "16:30", task: "🧠 JavaScript", done: false },
+                { time: "17:00-18:00", start: "17:00", end: "18:00", task: "🗣 English + Thai speaking", done: false },
+                { time: "19:30-21:00", start: "19:30", end: "21:00", task: "💪 Gym (Back + Biceps)", done: false },
+                { time: "21:30-23:30", start: "21:30", end: "23:30", task: "💻 Website Project", done: false }
+            ],
+            "Wednesday": [
+                { time: "12:30-14:30", start: "12:30", end: "14:30", task: "💻 Web Development", done: false },
+                { time: "15:00-16:30", start: "15:00", end: "16:30", task: "🧠 JavaScript", done: false },
+                { time: "17:00-18:00", start: "17:00", end: "18:00", task: "🗣 English + Thai speaking", done: false },
+                { time: "18:00-18:40", start: "18:00", end: "18:40", task: "📡 IoT learning", done: false },
+                { time: "19:30-21:00", start: "19:30", end: "21:00", task: "💪 Gym (Leg Day)", done: false },
+                { time: "21:30-23:30", start: "21:30", end: "23:30", task: "💻 Coding Project", done: false }
+            ],
+            "Thursday": [
+                { time: "12:30-15:00", start: "12:30", end: "15:00", task: "💻 Web Development (Deep work)", done: false },
+                { time: "15:00-16:30", start: "15:00", end: "16:30", task: "🧠 JavaScript", done: false },
+                { time: "17:00-18:00", start: "17:00", end: "18:00", task: "🗣 English + Thai speaking", done: false },
+                { time: "18:00-18:40", start: "18:00", end: "18:40", task: "📡 IoT learning", done: false },
+                { time: "19:00-00:00", start: "19:00", end: "23:59", task: "Relax / light coding", done: false }
+            ],
+            "Friday": [
+                { time: "12:30-14:30", start: "12:30", end: "14:30", task: "💻 Web Development", done: false },
+                { time: "15:00-16:30", start: "15:00", end: "16:30", task: "🧠 JavaScript", done: false },
+                { time: "17:00-18:00", start: "17:00", end: "18:00", task: "🗣 English + Thai", done: false },
+                { time: "19:30-21:00", start: "19:30", end: "21:00", task: "💪 Gym (Shoulders + Abs)", done: false },
+                { time: "21:30-23:30", start: "21:30", end: "23:30", task: "💻 Build Portfolio Website", done: false }
+            ],
+            "Saturday": [
+                { time: "12:30-14:30", start: "12:30", end: "14:30", task: "💻 Web Development", done: false },
+                { time: "15:00-16:30", start: "15:00", end: "16:30", task: "🧠 JavaScript", done: false },
+                { time: "17:00-18:00", start: "17:00", end: "18:00", task: "🗣 English + Thai", done: false },
+                { time: "18:00-18:40", start: "18:00", end: "18:40", task: "📡 IoT learning", done: false },
+                { time: "19:30-21:00", start: "19:30", end: "21:00", task: "💪 Gym (Chest + Triceps)", done: false },
+                { time: "21:30-23:30", start: "21:30", end: "23:30", task: "💻 Coding Practice", done: false }
+            ],
+            "Sunday": [
+                { time: "12:30-14:30", start: "12:30", end: "14:30", task: "💻 Web Development", done: false },
+                { time: "15:00-16:30", start: "15:00", end: "16:30", task: "🧠 JavaScript", done: false },
+                { time: "17:00-18:00", start: "17:00", end: "18:00", task: "🗣 English + Thai", done: false },
+                { time: "19:00-00:00", start: "19:00", end: "23:59", task: "Relax / Review coding", done: false }
+            ]
+        };
+
+        const normaDefault = {
+            "Monday": [
+                { time: "07:00-07:30", start: "07:00", end: "07:30", task: "Wake up", done: false },
+                { time: "07:30-08:00", start: "07:30", end: "08:00", task: "Breakfast", done: false },
+                { time: "08:40-11:00", start: "08:40", end: "11:00", task: "Career Preparation Class", done: false },
+                { time: "11:00-12:00", start: "11:00", end: "12:00", task: "Lunch + rest", done: false },
+                { time: "12:00-13:00", start: "12:00", end: "13:00", task: "English learning", done: false },
+                { time: "13:00-14:00", start: "13:00", end: "14:00", task: "Chinese learning", done: false },
+                { time: "14:00-15:00", start: "14:00", end: "15:00", task: "Reading", done: false },
+                { time: "15:00-17:30", start: "15:00", end: "17:30", task: "Study / assignments", done: false },
+                { time: "18:30-19:00", start: "18:30", end: "19:00", task: "Dinner", done: false },
+                { time: "19:30-20:30", start: "19:30", end: "20:30", task: "Gym", done: false },
+                { time: "21:00-23:00", start: "21:00", end: "23:00", task: "Relax", done: false }
+            ],
+            "Tuesday": [
+                { time: "12:00-12:30", start: "12:00", end: "12:30", task: "Wake up + brunch", done: false },
+                { time: "12:30-13:30", start: "12:30", end: "13:30", task: "English", done: false },
+                { time: "13:30-14:30", start: "13:30", end: "14:30", task: "Chinese", done: false },
+                { time: "14:30-15:30", start: "14:30", end: "15:30", task: "Reading", done: false },
+                { time: "15:30-17:30", start: "15:30", end: "17:30", task: "Study / assignments", done: false },
+                { time: "18:30-19:00", start: "18:30", end: "19:00", task: "Dinner", done: false },
+                { time: "19:30-20:30", start: "19:30", end: "20:30", task: "Gym", done: false },
+                { time: "21:00-23:30", start: "21:00", end: "23:30", task: "Relax / movie", done: false }
+            ],
+            "Wednesday": [
+                { time: "12:00-13:00", start: "12:00", end: "13:00", task: "Wake up + lunch", done: false },
+                { time: "13:00-14:00", start: "13:00", end: "14:00", task: "English", done: false },
+                { time: "14:30-16:50", start: "14:30", end: "16:50", task: "Front Office Class", done: false },
+                { time: "17:00-19:20", start: "17:00", end: "19:20", task: "Thai Class", done: false },
+                { time: "19:30-20:30", start: "19:30", end: "20:30", task: "Gym", done: false },
+                { time: "21:00-23:00", start: "21:00", end: "23:00", task: "Dinner + relax", done: false }
+            ],
+            "Thursday": [
+                { time: "12:00-12:30", start: "12:00", end: "12:30", task: "Wake up", done: false },
+                { time: "12:30-13:30", start: "12:30", end: "13:30", task: "English", done: false },
+                { time: "13:30-14:30", start: "13:30", end: "14:30", task: "Chinese", done: false },
+                { time: "14:30-15:30", start: "14:30", end: "15:30", task: "Reading", done: false },
+                { time: "15:30-17:30", start: "15:30", end: "17:30", task: "Study", done: false },
+                { time: "18:30-19:30", start: "18:30", end: "19:30", task: "Dinner", done: false },
+                { time: "19:30-22:30", start: "19:30", end: "22:30", task: "Relax / friends", done: false }
+            ],
+            "Friday": [
+                { time: "07:00-07:30", start: "07:00", end: "07:30", task: "Wake up", done: false },
+                { time: "07:30-08:00", start: "07:30", end: "08:00", task: "Breakfast", done: false },
+                { time: "08:40-11:00", start: "08:40", end: "11:00", task: "Japanese Class", done: false },
+                { time: "11:00-12:00", start: "11:00", end: "12:00", task: "Lunch", done: false },
+                { time: "12:00-14:00", start: "12:00", end: "14:00", task: "English + Chinese", done: false },
+                { time: "14:00-17:00", start: "14:00", end: "17:00", task: "Study", done: false },
+                { time: "18:30-19:00", start: "18:30", end: "19:00", task: "Dinner", done: false },
+                { time: "19:30-20:30", start: "19:30", end: "20:30", task: "Gym", done: false }
+            ],
+            "Saturday": [
+                { time: "12:00-13:00", start: "12:00", end: "13:00", task: "Wake up + brunch", done: false },
+                { time: "13:00-14:00", start: "13:00", end: "14:00", task: "English", done: false },
+                { time: "14:00-15:00", start: "14:00", end: "15:00", task: "Chinese", done: false },
+                { time: "15:00-16:00", start: "15:00", end: "16:00", task: "Reading", done: false },
+                { time: "16:00-19:00", start: "16:00", end: "19:00", task: "Travel / cafe / vlog", done: false },
+                { time: "19:30-20:30", start: "19:30", end: "20:30", task: "Gym", done: false },
+                { time: "21:00-23:30", start: "21:00", end: "23:30", task: "Relax", done: false }
+            ],
+            "Sunday": [
+                { time: "12:00-13:00", start: "12:00", end: "13:00", task: "Wake up", done: false },
+                { time: "13:00-14:00", start: "13:00", end: "14:00", task: "Brunch", done: false },
+                { time: "14:00-16:00", start: "14:00", end: "16:00", task: "Reading / planning", done: false },
+                { time: "16:00-18:00", start: "16:00", end: "18:00", task: "Free time", done: false },
+                { time: "18:30-19:00", start: "18:30", end: "19:00", task: "Dinner", done: false },
+                { time: "19:30-20:30", start: "19:30", end: "20:30", task: "Gym", done: false },
+                { time: "21:00-23:00", start: "21:00", end: "23:00", task: "Relax", done: false }
+            ]
+        };
+
+        // --- State ---
+        let currentProfile = null;
+        let activeDay = "Monday";
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        let allSchedules = JSON.parse(localStorage.getItem('couplePlannerData')) || {
+            htoo_aung: htooAungDefault,
+            norma: normaDefault
+        };
+
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        // --- Logic ---
+        function init() {
+            if (isDarkMode) document.body.classList.add('dark-mode');
+            
+            const todayIndex = new Date().getDay(); // 0 is Sunday
+            activeDay = days[todayIndex === 0 ? 6 : todayIndex - 1];
+            
+            updateClock();
+            setInterval(updateClock, 1000);
+            renderDayScroller();
+        }
+
+        function selectProfile(profile) {
+            currentProfile = profile;
+            document.getElementById('profile-selection').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            renderTimeline();
+        }
+
+        function backToProfiles() {
+            currentProfile = null;
+            document.getElementById('profile-selection').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            document.getElementById('dark-mode-toggle').textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const clockEl = document.getElementById('live-clock');
+            if (clockEl) {
+                clockEl.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+            }
+            if (currentProfile) updateCountdown();
+        }
+
+        function renderDayScroller() {
+            const scroller = document.getElementById('day-scroller');
+            scroller.innerHTML = days.map(day => `
+                <div class="day-tab ${day === activeDay ? 'active' : ''}" onclick="setDay('${day}')">${day}</div>
+            `).join('');
+        }
+
+        function setDay(day) {
+            activeDay = day;
+            renderDayScroller();
+            renderTimeline();
+        }
+
+        function renderTimeline() {
+            const timeline = document.getElementById('timeline');
+            const tasks = allSchedules[currentProfile][activeDay];
+            
+            const now = new Date();
+            const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
+            timeline.innerHTML = tasks.map((t, idx) => {
+                const startTimeParts = t.start.split(':');
+                const endTimeParts = t.end.split(':');
+                const startSec = parseInt(startTimeParts[0]) * 3600 + parseInt(startTimeParts[1]) * 60;
+                const endSec = parseInt(endTimeParts[0]) * 3600 + parseInt(endTimeParts[1]) * 60;
+                
+                const isActive = currentSeconds >= startSec && currentSeconds < endSec;
+
+                return `
+                    <div class="task-card ${isActive ? 'active' : ''}">
+                        <div class="task-time">${t.time}</div>
+                        <input type="text" class="task-name ${t.done ? 'completed' : ''}" 
+                            value="${t.task}" onchange="editTask(${idx}, this.value)">
+                        <input type="checkbox" class="task-check" ${t.done ? 'checked' : ''} 
+                            onclick="toggleComplete(${idx})">
+                        <button class="delete-btn" onclick="deleteTask(${idx})">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCountdown() {
+            const tasks = allSchedules[currentProfile][activeDay];
+            const now = new Date();
+            const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const display = document.getElementById('countdown-display');
+
+            let currentTask = null;
+            for (let t of tasks) {
+                const startTimeParts = t.start.split(':');
+                const endTimeParts = t.end.split(':');
+                const startSec = parseInt(startTimeParts[0]) * 3600 + parseInt(startTimeParts[1]) * 60;
+                const endSec = parseInt(endTimeParts[0]) * 3600 + parseInt(endTimeParts[1]) * 60;
+
+                if (currentSeconds >= startSec && currentSeconds < endSec) {
+                    currentTask = { ...t, endSec };
+                    break;
+                }
+            }
+
+            if (currentTask) {
+                const diff = currentTask.endSec - currentSeconds;
+                const mins = Math.floor(diff / 60);
+                const secs = diff % 60;
+                display.innerHTML = `⏳ <b>${mins} minutes ${secs} seconds</b> left for <i>${currentTask.task}</i>`;
+            } else {
+                display.textContent = "✨ No active task right now. Time to rest!";
+            }
+        }
+
+        // --- Task CRUD ---
+        function save() {
+            localStorage.setItem('couplePlannerData', JSON.stringify(allSchedules));
+        }
+
+        function toggleComplete(idx) {
+            allSchedules[currentProfile][activeDay][idx].done = !allSchedules[currentProfile][activeDay][idx].done;
+            save();
+            renderTimeline();
+        }
+
+        function editTask(idx, val) {
+            allSchedules[currentProfile][activeDay][idx].task = val;
+            save();
+        }
+
+        function deleteTask(idx) {
+            allSchedules[currentProfile][activeDay].splice(idx, 1);
+            save();
+            renderTimeline();
+        }
+
+        function addNewTask() {
+            const time = prompt("Enter time (e.g., 14:00-15:00):", "12:00-13:00");
+            if (!time) return;
+            const parts = time.split('-');
+            const name = prompt("Enter task name:");
+            if (!name) return;
+
+            allSchedules[currentProfile][activeDay].push({
+                time: time,
+                start: parts[0].trim(),
+                end: parts[1].trim(),
+                task: name,
+                done: false
+            });
+            
+            // Sort by start time
+            allSchedules[currentProfile][activeDay].sort((a, b) => a.start.localeCompare(b.start));
+            
+            save();
+            renderTimeline();
+        }
+
+        init();
+    </script>
+</body>
+</html>
